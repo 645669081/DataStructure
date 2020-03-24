@@ -12,6 +12,7 @@ import java.util.Date;
  * 缩小增量排序，增量即组间元素间隔
  * 希尔排序在时对分组内插入时采用交换法（类似于冒泡排序）和移动法（类似于插入排序）。整体还是移动法明显调整数字位置的次数少，只有在位置最终确定了才会交换，不然只是后移较大的元素
  * 本次代码没有使用交换法实现，需要交换法可以看老师的代码
+ * 排序方法中for和while两种不同的方式找插入点，while的效率明显高于for
  */
 public class ShellSort {
     public static void main(String[] args) {
