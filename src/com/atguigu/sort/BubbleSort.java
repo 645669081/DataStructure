@@ -6,6 +6,7 @@ import java.util.Date;
 
 /**
  * 冒泡排序
+ * 优化点：如果有一趟排序顺序没有发生变化即停止后边几趟排序，此时数组已经有顺序
  */
 public class BubbleSort {
     public static void main(String[] args) {
