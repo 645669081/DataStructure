@@ -11,34 +11,29 @@ import java.util.Date;
  * 希尔排序是对插入排序的插入间隔由原来的1增大，它的间隔变化是由最初的一个大值逐渐下降到1最终完成排序。减少了大量的位置交换
  * 缩小增量排序，增量即组间元素间隔
  * 希尔排序在时对分组内插入时采用交换法（类似于冒泡排序）和移动法（类似于插入排序）。整体还是移动法明显调整数字位置的次数少，只有在位置最终确定了才会交换，不然只是后移较大的元素
+ * 本次代码没有使用交换法实现，需要交换法可以看老师的代码
  */
 public class ShellSort {
     public static void main(String[] args) {
-        int[] arr = { 8, 9, 1, 7, 2, 3, 5, 4, 6, 0 };
-        System.out.println("排序前：" + Arrays.toString(arr));
+//        int[] arr = { 8, 9, 1, 7, 2, 3, 5, 4, 6, 0 };
+//        System.out.println("排序前：" + Arrays.toString(arr));
 
         // 创建要给80000个的随机的数组
-//        int[] arr = new int[80000];
-//        for (int i = 0; i < 80000; i++) {
-//            arr[i] = (int) (Math.random() * 8000000); // 生成一个[0, 8000000) 数
-//        }
-//
-//        System.out.println("排序前");
-//        Date data1 = new Date();
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        String date1Str = simpleDateFormat.format(data1);
-//        System.out.println("排序前的时间是=" + date1Str);
-//
+        int[] arr = new int[80000];
+        for (int i = 0; i < 80000; i++) {
+            arr[i] = (int) (Math.random() * 8000000); // 生成一个[0, 8000000) 数
+        }
+
+        long start = System.currentTimeMillis();
+
         shellSort(arr);
-//
-//        Date data2 = new Date();
-//        String date2Str = simpleDateFormat.format(data2);
-//        System.out.println("排序前的时间是=" + date2Str);
+
+        System.out.println("总耗时是" + (System.currentTimeMillis() - start) + "毫秒");
     }
 
     /**
      * 使用逐步推导的方式来编写希尔排序
-     * 希尔排序时， 对有序序列在插入时采用移位法
+     * 希尔排序时， 对有序序列在插入时采用移位法。
      * @param arr
      */
     public static void shellSort(int[] arr) {
@@ -64,10 +59,10 @@ public class ShellSort {
 //                    }
 //                }
 
-
                 int insertVal = arr[i];
                 int insertIndex = i;
-                while (insertIndex - gap >= 0 && insertVal < arr[insertIndex]) {
+                //只有向前推一个gap间隔的元素大小比较满足要求才能后移，后移完成后更新插入点位置
+                while (insertIndex - gap >= 0 && insertVal < arr[insertIndex - gap]) {
                     //较大值放后边
                     arr[insertIndex] = arr[insertIndex - gap];
                     //分组内待比较元素向前推移
@@ -78,7 +73,7 @@ public class ShellSort {
                     arr[insertIndex] = insertVal;
                 }
             }
-            System.out.println("希尔排序"+ count +"轮后=" + Arrays.toString(arr));
+//            System.out.println("希尔排序"+ count +"轮后=" + Arrays.toString(arr));
         }
 
 
