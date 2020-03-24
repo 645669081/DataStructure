@@ -14,26 +14,26 @@ import java.util.Date;
  */
 public class ShellSort {
     public static void main(String[] args) {
-//        int[] arr = { 8, 9, 1, 7, 2, 3, 5, 4, 6, 0 };
-//        System.out.println("排序前：" + Arrays.toString(arr));
+        int[] arr = { 8, 9, 1, 7, 2, 3, 5, 4, 6, 0 };
+        System.out.println("排序前：" + Arrays.toString(arr));
 
         // 创建要给80000个的随机的数组
-        int[] arr = new int[80000];
-        for (int i = 0; i < 80000; i++) {
-            arr[i] = (int) (Math.random() * 8000000); // 生成一个[0, 8000000) 数
-        }
-
-        System.out.println("排序前");
-        Date data1 = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String date1Str = simpleDateFormat.format(data1);
-        System.out.println("排序前的时间是=" + date1Str);
-
+//        int[] arr = new int[80000];
+//        for (int i = 0; i < 80000; i++) {
+//            arr[i] = (int) (Math.random() * 8000000); // 生成一个[0, 8000000) 数
+//        }
+//
+//        System.out.println("排序前");
+//        Date data1 = new Date();
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        String date1Str = simpleDateFormat.format(data1);
+//        System.out.println("排序前的时间是=" + date1Str);
+//
         shellSort(arr);
-
-        Date data2 = new Date();
-        String date2Str = simpleDateFormat.format(data2);
-        System.out.println("排序前的时间是=" + date2Str);
+//
+//        Date data2 = new Date();
+//        String date2Str = simpleDateFormat.format(data2);
+//        System.out.println("排序前的时间是=" + date2Str);
     }
 
     /**
@@ -51,24 +51,34 @@ public class ShellSort {
             //这个循环遍历到的是组外的待插入元素
             for (int i = gap; i < arr.length; i++) {
                 //保存待插入组内元素值，防止后移组内元素时被覆盖
+//                int insertVal = arr[i];
+//                int insertIndex = i;
+//                //进行组内排序,此时的arr[i]是组外的第一个被遍历到的值，对该值进行组内的插入排序。此时同一组就看成一个小数组插入排序即可
+//                // 将待插入组内的元素从arr[i-同一组元素间间隔（与组数相同）]组内的最后一个元素进行倒序比较
+//                for (int j = i-gap; j >= 0; j -= gap) {
+//                    //待插入元素比组内元素小则将组内元素后移
+//                    if (insertVal < arr[j]) {
+//                        //将组内元素后移
+//                        arr[j + gap] = arr[j];
+//                        insertIndex = j;
+//                    }
+//                }
+
+
                 int insertVal = arr[i];
                 int insertIndex = i;
-                //进行组内排序,此时的arr[i]是组外的第一个被遍历到的值，对该值进行组内的插入排序。此时同一组就看成一个小数组插入排序即可
-                // 将待插入组内的元素从arr[i-同一组元素间间隔（与组数相同）]组内的最后一个元素进行倒序比较
-                for (int j = i-gap; j >= 0; j -= gap) {
-                    //待插入元素比组内元素小则将组内元素后移
-                    if (insertVal < arr[j]) {
-                        //将组内元素后移
-                        arr[j + gap] = arr[j];
-                        insertIndex = j;
-                    }
+                while (insertIndex - gap >= 0 && insertVal < arr[insertIndex]) {
+                    //较大值放后边
+                    arr[insertIndex] = arr[insertIndex - gap];
+                    //分组内待比较元素向前推移
+                    insertIndex -= gap;
                 }
                 //待插入元素获取插入位置完成后进行插入
                 if (insertIndex != i) {
                     arr[insertIndex] = insertVal;
                 }
             }
-//            System.out.println("希尔排序"+ count +"轮后=" + Arrays.toString(arr));
+            System.out.println("希尔排序"+ count +"轮后=" + Arrays.toString(arr));
         }
 
 
