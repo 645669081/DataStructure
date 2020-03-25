@@ -65,7 +65,8 @@ public class MergetSort {
      * @param temp 做中转的数组
      */
     public static void merge(int[] arr, int left, int mid, int right, int[] temp) {
-        //为两个数组初始化遍历比较时使用的指针，相当于将排序区间的数组分成两半
+        //为两个数组初始化遍历比较时使用的指针，相当于将排序区间的数组分成两半。
+        //左边数组起始位置left，左边数组结束位置mid。右边数组起始位置mid+1,右边数组结束位置right
         int i = left; //左半部分数组指针起始位置
         int j = mid + 1;  //右半部分数组指针起始位置
         int index = 0; //数组
