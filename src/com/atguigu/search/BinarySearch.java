@@ -8,6 +8,9 @@ import java.util.List;
  * 要求数组有序
  */
 public class BinarySearch {
+
+    private static int count = 1;
+
     public static void main(String[] args) {
         int arr[] = { 1, 8, 10, 89, 1000, 1000, 1234};
 
@@ -29,6 +32,7 @@ public class BinarySearch {
             return new ArrayList<>();
         }
         int mid = (left + right) / 2;
+        System.out.println("二分查找第" + count++ + "次");
         //去和arr[mid]进行比较来决定向哪边递归查找
         if (findVal > arr[mid]) {
             //向右递归查找
@@ -49,7 +53,7 @@ public class BinarySearch {
             indexList.add(mid);
             //向右查找相同值
             findEqualValIndex = mid + 1;
-            while (findEqualValIndex <= right && arr[findEqualValIndex] == findVal) {
+            while (findEqualValIndex <= arr.length -1 && arr[findEqualValIndex] == findVal) {
                 indexList.add(findEqualValIndex);
                 findEqualValIndex++;
             }
