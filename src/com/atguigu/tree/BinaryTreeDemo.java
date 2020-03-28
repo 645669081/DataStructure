@@ -22,12 +22,18 @@ public class BinaryTreeDemo {
         HeroNode node4 = new HeroNode(4, "林冲");
         HeroNode node5 = new HeroNode(5, "关胜");
 
+        HeroNode node6 = new HeroNode(6, "林冲1111");
+        HeroNode node7 = new HeroNode(7, "关胜111");
+
         //说明，我们先手动创建该二叉树，后面我们学习递归的方式创建二叉树
         root.setLeft(node2);
         root.setRight(node3);
         node3.setRight(node4);
         node3.setLeft(node5);
         binaryTree.setRoot(root);
+
+        node5.setLeft(node6);
+        node5.setRight(node7);
 
         System.out.println("前序遍历"); // 1,2,3,5,4
 		binaryTree.preOrder();
@@ -45,7 +51,7 @@ public class BinaryTreeDemo {
 //        System.out.println("后序查找" + binaryTree.postOrderSearch(5));//2次
 
         //删除节点
-        binaryTree.delNode(5);
+        binaryTree.delNode1(3);
         System.out.println("删除节点后");
         binaryTree.preOrder();
     }
@@ -133,6 +139,20 @@ class BinaryTree {
                 return;
             }
             root.deleteNode(no, root);
+        }else{
+            System.out.println("空树，不能删除~");
+        }
+    }
+
+    //删除结点,不删除子树
+    public void delNode1(int no) {
+        if(root != null) {
+            //目前无法删除根节点，因为删除了根节点后，提升了左节点，但是右侧的子树挂到哪里呢
+//            if (root.getNo() == no) {
+//                root = null;
+//                return;
+//            }
+            root.deleteNode(no);
         }else{
             System.out.println("空树，不能删除~");
         }
@@ -318,5 +338,80 @@ class HeroNode {
         deleteNode(no, root.left);
         //向右遍历查找节点进行删除
         deleteNode(no, root.right);
+    }
+
+    /**
+     * 删除节点不删除子树，如果只有一个子节点直接代替父节点，如果有两个子节点那么左子节点代替父节点
+     */
+    public void deleteNode(int no) {
+        //删除的是左节点
+        if (this.left != null && this.left.no == no) {
+            HeroNode delLeft = this.left;
+            //要删除的节点没有子节点直接进行删除
+            if (delLeft.left == null && delLeft.right == null) {
+                this.left = null;
+            } else if (delLeft.left != null && delLeft.right != null) {
+                //要删除的节点左右节点都有
+                //往下递归左节点，直到出现该节点没有挂满，那么将右节点挂到该节点上
+                //创建临时变量表示被删除节点的左节点的左右节点，被删除节点的右节点是不能找的，因为它是要挂到左节点底下的
+                HeroNode left = delLeft.left;
+                while (left.left != null && left.right != null) {
+                    //这些节点都挂满了直接往下走
+                    left = left.left;
+                }
+                //找到了可以挂右节点的位置
+                if (left.left == null) {
+                    left.left = delLeft.right;
+                } else {
+                    left.right = delLeft.right;
+                }
+                //将被删除节点的左节点升级为父节点
+                this.left = delLeft.left;
+            } else if (delLeft.left != null){
+                //被删除节点的左节点不为null
+                this.left = delLeft.left;
+            } else {
+                //被删除节点的右节点不为null
+                this.left = delLeft.right;
+            }
+        }
+        //删除的是右节点
+        if (this.right != null && this.right.no == no) {
+            HeroNode delRight = this.right;
+            //要删除的节点没有子节点直接进行删除
+            if (delRight.left == null && delRight.right == null) {
+                this.right = null;
+            } else if (delRight.left != null && delRight.right != null) {
+                //要删除的节点左右节点都有
+                //往下递归左节点，直到出现该节点没有挂满，那么将右节点挂到该节点上
+                //创建临时变量表示被删除节点的左节点的左右节点，被删除节点的右节点是不能找的，因为它是要挂到左节点底下的
+                HeroNode left = delRight.left;
+                while (left.left != null && left.right != null) {
+                    //这些节点都挂满了直接往下走
+                    left = left.left;
+                }
+                //找到了可以挂右节点的位置
+                if (left.left == null) {
+                    left.left = delRight.right;
+                } else {
+                    left.right = delRight.right;
+                }
+                //将被删除节点的左节点升级为父节点
+                this.right = delRight.left;
+            } else if (delRight.left != null){
+                //被删除节点的左节点不为null
+                this.right = delRight.left;
+            } else {
+                //被删除节点的右节点不为null
+                this.right = delRight.right;
+            }
+        }
+        //递归左右节点
+        if (this.getLeft() != null) {
+            this.left.deleteNode(no);
+        }
+        if (this.getRight() != null) {
+            this.right.deleteNode(no);
+        }
     }
 }
