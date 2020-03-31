@@ -1,6 +1,8 @@
 package com.atguigu.tree;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * @Date 2020/3/30 6:12
@@ -13,14 +15,29 @@ public class HeapSort {
     public static void main(String[] args) {
 //        int[] tree = {4, 10, 3, 5, 1, 2};
 //        int[] tree = {2, 5, 3, 1, 10, 4};
-        int[] tree = {4, 6, 8, 5, 9, -1, 90, 89, 56, -99};
+//        int[] tree = {4, 6, 8, 5, 9, -1, 90, 89, 56, -99};
 //        heapify(tree, tree.length, 0);
 //        heapify(tree, tree.length, 0);
 //        heapify(tree, tree.length, 2);
 
 //        buildHeap(tree, tree.length);
-        heapSort(tree, tree.length);
-        System.out.println(Arrays.toString(tree));
+
+        // 创建要给80000个的随机的数组
+        int[] arr = new int[8000000];
+        for (int i = 0; i < 8000000; i++) {
+            arr[i] = (int) (Math.random() * 8000000); // 生成一个[0, 8000000) 数
+        }
+        System.out.println("排序前");
+        Date data1 = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date1Str = simpleDateFormat.format(data1);
+        System.out.println("排序前的时间是=" + date1Str);
+
+        heapSort(arr, arr.length);
+
+        Date data2 = new Date();
+        String date2Str = simpleDateFormat.format(data2);
+        System.out.println("排序前的时间是=" + date2Str);
     }
 
     public static void swap(int[] tree, int i, int max) {
