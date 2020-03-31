@@ -41,8 +41,57 @@ public class HuffmanCode {
 //        System.out.println("huffmanCodeBytes=" + Arrays.toString(huffmanCodeBytes));//17
 
         byte[] bytes = huffmanZip(contentBytes);
-        System.out.println(Arrays.toString(bytes));
-        System.out.println(bytes.length);
+//        System.out.println(Arrays.toString(bytes));
+//        System.out.println(bytes.length);
+
+    }
+
+    /**
+     * 将一个byte 转成一个二进制的字符串, 如果看不懂，可以参考我讲的Java基础 二进制的原码，反码，补码
+     * @param b 传入的 byte
+     * @param flag 标志是否需要补高位如果是true ，表示需要补高位，如果是false表示不补, 如果是最后一个字节，无需补高位
+     * @return 是该b 对应的二进制的字符串，（注意是按补码返回）
+     */
+    private static String byteToBitString(byte b) {
+//        String binaryString = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+        String binaryString = Long.toString(b & 0xff, 2);
+//        System.out.println(binaryString);
+        return binaryString;
+    }
+
+    /**
+     * 完成对压缩数据的解码
+     * @param huffmanCodes 赫夫曼编码表 map
+     * @param huffmanBytes 赫夫曼编码得到的字节数组
+     * @return 就是原来的字符串对应的数组
+     */
+    private static byte[] decode(Map<Byte,String> huffmanCodes, byte[] huffmanBytes) {
+        //获取霍夫曼编码后的二进制字符串
+        StringBuilder bitString = new StringBuilder();
+        for (byte huffmanByte : huffmanBytes) {
+            bitString.append(byteToBitString(huffmanByte));
+        }
+        //构建一个反向映射的map便于解码时使用
+        Map<String, Byte> map = new HashMap<>();
+        for (Map.Entry<Byte, String> byteStringEntry : huffmanCodes.entrySet()) {
+            map.put(byteStringEntry.getValue(), byteStringEntry.getKey());
+        }
+        //从编码表中拿到编码对应的字母
+        int index = 0;
+        StringBuilder content = new StringBuilder();
+        StringBuilder temp = new StringBuilder();
+        //遍历字符串找对应的字符
+        while (index < bitString.length()) {
+            //该字符解码表中不包含则继续移动到下一位
+            if (!map.containsKey(temp.toString())) {
+                temp.append(bitString.charAt(index));
+                index++;
+            } else {
+                content.append(map.get(temp.toString()));
+                temp.delete(0, temp.length());
+            }
+        }
+        return content.toString().getBytes();
     }
 
     /**
@@ -75,6 +124,8 @@ public class HuffmanCode {
             String code = huffmanCodes.get(aByte);
             builder.append(code);
         }
+//        System.out.println("霍夫曼编码后的二进制字符串是：" + builder);
+        System.out.println(builder.toString());
         //因为霍夫曼编码是前缀编码，所以可以全部无间隔放到一起。此时的得到的字符串比未编码时还要长，所以需要使用最小的方式存储。即存储为byte的数组的形式。这样才达到了压缩的目的
         int length;
         //每8位就可以构成一个byte，计算byte长度用来创建数组
