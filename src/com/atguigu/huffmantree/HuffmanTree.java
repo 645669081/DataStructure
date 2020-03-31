@@ -28,17 +28,20 @@ public class HuffmanTree {
             Node node = new Node(weight);
             nodeList.add(node);
         }
-        //将权值数据排序
-        Collections.sort(nodeList);
 
         //当集合中剩余节点大于1，表明还没有创建霍夫曼树完成
         while (nodeList.size() > 1) {
+            //将权值数据排序
+            Collections.sort(nodeList);
             //取出权值最小的结点（二叉树）
             Node left = nodeList.get(0);
             //取出权值第二小的结点（二叉树）
             Node right = nodeList.get(1);
             //使用这两个节点生成一个父节点
             Node parent = new Node(left.value + right.value);
+            //构建子节点和父节点关系
+            parent.left = left;
+            parent.right = right;
             //删除合并完成的两个节点并将新节点添加到集合
             nodeList.remove(left);
             nodeList.remove(right);
