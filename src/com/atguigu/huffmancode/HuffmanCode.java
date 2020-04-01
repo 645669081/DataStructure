@@ -1,5 +1,12 @@
 package com.atguigu.huffmancode;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +18,8 @@ import java.util.Map;
 /**
  * author:w_liangwei
  * date:2020/3/31
- * Description: 霍夫曼编码，一种前缀编码，可实现无损压缩。使用霍夫曼树可达到发送频率高的字符编码短，频率小的字符编码长
+ * Description: 实现了一个霍夫曼编码并对文件或消息的压缩和解压缩
+ * 霍夫曼编码，一种前缀编码，可实现无损压缩。使用霍夫曼树可达到发送频率高的字符编码短，频率小的字符编码长
  * 有多个相同的权值时，构建霍夫曼树过程中新生成的父节点的权值如果和原有的节点的权值相同，那父节点可能的排序到相同大小的任何位置，所以生成的霍夫曼树可能不一样，但WPD是一样的最小的。
  * 如2，4，6，6，6，取出2和4生成6可能放到原有2个6的中间或者两边，导致最终生成的霍夫曼树就可能不一样
  *
@@ -30,9 +38,9 @@ public class HuffmanCode {
     static String str;
 
     public static void main(String[] args) throws UnsupportedEncodingException {
-        String content = "i like like like java do you like a java";
-        byte[] contentBytes = content.getBytes();
-        System.out.println("未压缩的长度：" + contentBytes.length);
+//        String content = "i like like like java do you like a java";
+//        byte[] contentBytes = content.getBytes();
+//        System.out.println("未压缩的长度：" + contentBytes.length);
 
         //测试一把，创建的赫夫曼树
 //        List<Node> nodes = getNodes(contentBytes);
@@ -55,8 +63,8 @@ public class HuffmanCode {
 
 
 
-        byte[] bytes = huffmanZip(contentBytes);
-        System.out.println("压缩后长度：" + bytes.length);
+//        byte[] bytes = huffmanZip(contentBytes);
+//        System.out.println("压缩后长度：" + bytes.length);
 
         //发送编码后的byte数组，实际使用时这么做
 
@@ -65,10 +73,10 @@ public class HuffmanCode {
            1.先将编码后的字节数组转为原先的二进制字符串
            2.根据得到的编码表将二进制字符串翻译为可见文字
          */
-        byte[] sourceBytes = decode(huffmanCodes, bytes);
-        String receiveContent = new String(sourceBytes);
-        System.out.println("原来的字符串=" + receiveContent);
-        System.out.println("与发送内容是否相同：" + content.equals(receiveContent));
+//        byte[] sourceBytes = decode(huffmanCodes, bytes);
+//        String receiveContent = new String(sourceBytes);
+//        System.out.println("原来的字符串=" + receiveContent);
+//        System.out.println("与发送内容是否相同：" + content.equals(receiveContent));
 
         //测试toBinaryString方法返回的二进制位数问题
 //        String s1 = Integer.toBinaryString(0);
@@ -76,7 +84,79 @@ public class HuffmanCode {
         //转换后总共本应该是32位二进制构成的int，但是正数会省略前边是0的部分，而负数由于首位为1代表符号位则不会
 //        System.out.println(1);
 //        System.out.println(-1);
+
+
+        //测试文件压缩
+//        String src = "d:/timg.jpg";
+//        String dst = "d:/111.jpg";
+//        zipFile(src, dst);
+//        unZipFile(dst, "d:/222.jpg");
     }
+
+    /**
+     * 完成对压缩文件的解压
+     * @param zipFile 准备解压的文件
+     * @param dstFile 将文件解压到哪个路径
+     */
+    public static void unZipFile(String zipFile, String dstFile) {
+        FileInputStream fileInputStream = null;
+        FileOutputStream fileOutputStream = null;
+        ObjectInputStream objectInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(zipFile);
+            objectInputStream = new ObjectInputStream(fileInputStream);
+            //读取顺序需和写入顺序一致
+            byte[] huffmanZip = (byte[]) objectInputStream.readObject();
+            Map<Byte, String> codeMap = (Map<Byte, String>) objectInputStream.readObject();
+            byte[] unzipBytes = decode(codeMap, huffmanZip);
+            fileOutputStream = new FileOutputStream(dstFile);
+            fileOutputStream.write(unzipBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fileInputStream.close();
+                fileOutputStream.close();
+                objectInputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     *
+     * @param srcFile 你传入的希望压缩的文件的全路径
+     * @param dstFile 我们压缩后将压缩文件放到哪个目录
+     */
+    public static void zipFile(String srcFile, String dstFile) {
+        FileInputStream inputStream = null;
+        ObjectOutputStream objectOutputStream = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            inputStream = new FileInputStream(srcFile);
+            byte[] bytes = new byte[inputStream.available()];
+            inputStream.read(bytes);
+            byte[] huffmanZip = huffmanZip(bytes);
+            //将压缩后的字节和码表写入文件,使用objectOutputStream方便写入。直接序列化对象
+            fileOutputStream = new FileOutputStream(dstFile);
+            objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(huffmanZip);
+            objectOutputStream.writeObject(huffmanCodes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                inputStream.close();
+                objectOutputStream.close();
+                fileOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 
     /**
      * 测试二进制字符串转int----->强转byte----->转换到int---->还原到二进制字符串的过程
@@ -146,7 +226,7 @@ public class HuffmanCode {
             boolean flag = huffmanBytes.length -1 == i;//判断是否处理的是最后一位，最后一位无需补高位
             bitString.append(byteToBitString(!flag, huffmanBytes[i]));
             //验证对当前字节的处理是否和预期一致
-            boolean startsWith = str.startsWith(bitString.toString());
+//            boolean startsWith = str.startsWith(bitString.toString());
 //            if (!startsWith) {
 //                System.out.println(huffmanBytes[i]);
 //                System.out.println(startsWith);
@@ -154,7 +234,7 @@ public class HuffmanCode {
         }
 //        System.out.println("还原后的二进制字符串：" + bitString);
 //        System.out.println("长度是" + bitString.length());
-        System.out.println("还原后的二进制传是否与原来相同：" + bitString.toString().equals(str));
+//        System.out.println("还原后的二进制传是否与原来相同：" + bitString.toString().equals(str));
         //构建一个反向映射的map便于解码时使用
         Map<String, Byte> map = new HashMap<>();
         for (Map.Entry<Byte, String> byteStringEntry : huffmanCodes.entrySet()) {
