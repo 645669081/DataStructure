@@ -1,5 +1,6 @@
 package com.atguigu.huffmancode;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,13 +14,22 @@ import java.util.Map;
  * Description: 霍夫曼编码，一种前缀编码，可实现无损压缩。使用霍夫曼树可达到发送频率高的字符编码短，频率小的字符编码长
  * 有多个相同的权值时，构建霍夫曼树过程中新生成的父节点的权值如果和原有的节点的权值相同，那父节点可能的排序到相同大小的任何位置，所以生成的霍夫曼树可能不一样，但WPD是一样的最小的。
  * 如2，4，6，6，6，取出2和4生成6可能放到原有2个6的中间或者两边，导致最终生成的霍夫曼树就可能不一样
+ *
+ * 原码：最高位表示符号位 "1"为负、"0"为正，其他位为正常二进制形式。
+ * 反码：正数的反码即原码本身；负数则在原码的基础上，除符号位之外的其他各位置反。
+ * 补码：正数的补码即原码本身；负数则在反码基础上+1。
+ * 计算机中所有二进制的操作都是通过补码进行
+ * 正数：3 = 0000 0011[原 | 反 | 补]
+ * 负数：-3 = 1000 0011[原] = 1111 1100[反] = 1111 1101[补]
  */
 public class HuffmanCode {
 
     //存放霍夫曼编码
     static Map<Byte, String> huffmanCodes = new HashMap<Byte,String>();
 
-    public static void main(String[] args) {
+    static String str;
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
         String content = "i like like like java do you like a java";
         byte[] contentBytes = content.getBytes();
         System.out.println("未压缩的长度：" + contentBytes.length);
@@ -40,10 +50,58 @@ public class HuffmanCode {
 //        byte[] huffmanCodeBytes = zip(contentBytes, huffmanCodes);
 //        System.out.println("huffmanCodeBytes=" + Arrays.toString(huffmanCodeBytes));//17
 
-        byte[] bytes = huffmanZip(contentBytes);
-//        System.out.println(Arrays.toString(bytes));
-//        System.out.println(bytes.length);
+        //测试二进制字符串经过转换后能否还原到和原来一样
+//        testConvert("10101000");
 
+
+
+        byte[] bytes = huffmanZip(contentBytes);
+        System.out.println("压缩后长度：" + bytes.length);
+
+        //发送编码后的byte数组，实际使用时这么做
+
+        /*
+          .解码
+           1.先将编码后的字节数组转为原先的二进制字符串
+           2.根据得到的编码表将二进制字符串翻译为可见文字
+         */
+        byte[] sourceBytes = decode(huffmanCodes, bytes);
+        String receiveContent = new String(sourceBytes);
+        System.out.println("原来的字符串=" + receiveContent);
+        System.out.println("与发送内容是否相同：" + content.equals(receiveContent));
+
+        //测试toBinaryString方法返回的二进制位数问题
+//        String s1 = Integer.toBinaryString(0);
+//        String s2 = Integer.toBinaryString(-3);
+        //转换后总共本应该是32位二进制构成的int，但是正数会省略前边是0的部分，而负数由于首位为1代表符号位则不会
+//        System.out.println(1);
+//        System.out.println(-1);
+    }
+
+    /**
+     * 测试二进制字符串转int----->强转byte----->转换到int---->还原到二进制字符串的过程
+     * 即看一下最后获得到的字符串是否与原先的二进制字符串一致，由于int值位数比byte多，而byte只有8位，所以自取末尾的8位比较
+     * @param binaryStr 最初的二进制字符串
+     */
+    public static void testConvert(String binaryStr) {
+        System.out.println("=========================================================");
+        System.out.println("要转换的二进制字符串是：" + binaryStr);
+        int parseInt = Integer.parseInt(binaryStr, 2);
+        Byte a = (byte) parseInt;
+        System.out.println("转换后的int：" + parseInt);
+        System.out.println("转换后的byte：" + a);
+        int b = a.intValue();
+        System.out.println("byte强转到int后：" + b);
+        String binaryString = Integer.toBinaryString(b);
+        System.out.println("int转为二进制后：" + binaryString);
+        String substring;
+        if (binaryString.length() - 8 < 0) {
+            substring = binaryStr;
+        } else {
+            substring = binaryString.substring(binaryString.length() - 8);
+        }
+        System.out.println("截取后8位的二进制值：" + substring);
+        System.out.println("是否与原先二进制字符串相同：" + substring.equals(binaryStr));
     }
 
     /**
@@ -52,11 +110,25 @@ public class HuffmanCode {
      * @param flag 标志是否需要补高位如果是true ，表示需要补高位，如果是false表示不补, 如果是最后一个字节，无需补高位
      * @return 是该b 对应的二进制的字符串，（注意是按补码返回）
      */
-    private static String byteToBitString(byte b) {
-//        String binaryString = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
-        String binaryString = Long.toString(b & 0xff, 2);
-//        System.out.println(binaryString);
-        return binaryString;
+    private static String byteToBitString(boolean flag, byte b) {
+        //与编码时的逆顺序，先将byte转为int，再把int转为二进制
+        int temp = (int)b;
+        //在处理负数时由于最高位是符号位1所以返回的是完整的32位，但是在处理正数时由于符号位为0，前边全部都是0填充，被省略。直接从补码不为0的位置开始返回。
+        //所以这里需要对正数进行处理，使其返回完整的32位，而处理时还不能影响到最后边的补码，所以改变符号位就是最好的
+        if (temp >= 0 && flag) {
+            //按位或 256  1 0000 0000  | 0000 0001 => 1 0000 0001。相应位置有值为1则最终结果对应位置也为1
+            temp |= 256;
+        }
+        //这里得到的是二进制的补码
+        String binaryString = Integer.toBinaryString(temp);
+        //判断生成的二进制长度是否满足截取要求
+        String result;
+        if (binaryString.length() - 8 < 0) {
+            result = binaryString;
+        } else {
+            result = binaryString.substring(binaryString.length() - 8);
+        }
+        return result;
     }
 
     /**
@@ -68,9 +140,21 @@ public class HuffmanCode {
     private static byte[] decode(Map<Byte,String> huffmanCodes, byte[] huffmanBytes) {
         //获取霍夫曼编码后的二进制字符串
         StringBuilder bitString = new StringBuilder();
-        for (byte huffmanByte : huffmanBytes) {
-            bitString.append(byteToBitString(huffmanByte));
+        for (int i = 0; i < huffmanBytes.length; i++) {
+            //如果是最后一个byte就不需要补位，因为我们当初对zip方法生成的霍夫曼编码后的二进制字符串经过每8位切割为1个byte时，最后一次切割的位数是不足8位的，此时还原为2进制字符串时不需要
+            //补位，补位反而和原来的字符串不对应
+            boolean flag = huffmanBytes.length -1 == i;//判断是否处理的是最后一位，最后一位无需补高位
+            bitString.append(byteToBitString(!flag, huffmanBytes[i]));
+            //验证对当前字节的处理是否和预期一致
+            boolean startsWith = str.startsWith(bitString.toString());
+//            if (!startsWith) {
+//                System.out.println(huffmanBytes[i]);
+//                System.out.println(startsWith);
+//            }
         }
+//        System.out.println("还原后的二进制字符串：" + bitString);
+//        System.out.println("长度是" + bitString.length());
+        System.out.println("还原后的二进制传是否与原来相同：" + bitString.toString().equals(str));
         //构建一个反向映射的map便于解码时使用
         Map<String, Byte> map = new HashMap<>();
         for (Map.Entry<Byte, String> byteStringEntry : huffmanCodes.entrySet()) {
@@ -78,20 +162,27 @@ public class HuffmanCode {
         }
         //从编码表中拿到编码对应的字母
         int index = 0;
-        StringBuilder content = new StringBuilder();
+        List<Byte> asciiList = new ArrayList<>();
         StringBuilder temp = new StringBuilder();
-        //遍历字符串找对应的字符
+        //遍历字符串找对应的字符,我们当初存储编码表时是以byte类型的字符的ascii码为key，存到了编码表的map中。此时从编码表中取出时还应该是byte类型的ascii码
         while (index < bitString.length()) {
-            //该字符解码表中不包含则继续移动到下一位
-            if (!map.containsKey(temp.toString())) {
-                temp.append(bitString.charAt(index));
-                index++;
-            } else {
-                content.append(map.get(temp.toString()));
+            //该字符解码表中不包含则继续移动到下一位。进来先去拼接，然后去根据拼接的路径取值。如果是先取后拼，每次都获取的是上一次拼接后的结果，那么就会少处理一个字符
+            temp.append(bitString.charAt(index));
+            Byte aByte = map.get(temp.toString());
+            if (aByte != null) {
+                asciiList.add(map.get(temp.toString()));
+                //清空拼接内容进行下一次拼接
                 temp.delete(0, temp.length());
             }
+            //不管是获取成功或失败都需要移动索引到下一个拼接位置
+            index++;
         }
-        return content.toString().getBytes();
+        //创建数组时写入的是容量，不是索引
+        byte[] contentBytes = new byte[asciiList.size()];
+        for (int i = 0; i < asciiList.size(); i++) {
+            contentBytes[i] = asciiList.get(i);
+        }
+        return contentBytes;
     }
 
     /**
@@ -124,8 +215,9 @@ public class HuffmanCode {
             String code = huffmanCodes.get(aByte);
             builder.append(code);
         }
-//        System.out.println("霍夫曼编码后的二进制字符串是：" + builder);
-        System.out.println(builder.toString());
+        str = builder.toString();
+        System.out.println("霍夫曼编码后的二进制字符串是：" + builder);
+        System.out.println("长度是" + builder.length());
         //因为霍夫曼编码是前缀编码，所以可以全部无间隔放到一起。此时的得到的字符串比未编码时还要长，所以需要使用最小的方式存储。即存储为byte的数组的形式。这样才达到了压缩的目的
         int length;
         //每8位就可以构成一个byte，计算byte长度用来创建数组
@@ -140,10 +232,12 @@ public class HuffmanCode {
         for (int i = 0, j = 0; i < huffmanCodeBytes.length; i++, j += 8) {
             String byteStr;
             if (j + 8 > builder.length() -1) {
-                byteStr = builder.substring(j, builder.length() - 1);
+                byteStr = builder.substring(j);
             } else {
                 byteStr = builder.substring(j, j + 8);
             }
+            //验证加入的byte值是否最后可以恢复到二进制字符串
+//            testConvert(byteStr);
             huffmanCodeBytes[i] = (byte) Integer.parseInt(byteStr, 2);
         }
         return huffmanCodeBytes;
