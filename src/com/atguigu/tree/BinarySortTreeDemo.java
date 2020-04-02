@@ -1,5 +1,8 @@
 package com.atguigu.tree;
 
+import com.atguigu.util.TreeNode;
+import com.atguigu.util.Utils;
+
 /**
  * @Date 2020/4/2 6:32
  * @Auther 梁伟
@@ -25,21 +28,22 @@ public class BinarySortTreeDemo {
         //中序遍历二叉排序树
         System.out.println("中序遍历二叉排序树~");
         binarySortTree.infixOrder(); // 1, 3, 5, 7, 9, 10, 12
+        Utils.pirnt(binarySortTree.getRoot());
 
         //测试删除节点
-        binarySortTree.delNode(10);
+//        binarySortTree.delNode(10);
+//
+//        binarySortTree.delNode(5);
+//        binarySortTree.delNode(10);
+//        binarySortTree.delNode(2);
+//        binarySortTree.delNode(3);
+//
+//        binarySortTree.delNode(9);
+//        binarySortTree.delNode(1);
+//        binarySortTree.delNode(7);
 
-        binarySortTree.delNode(5);
-        binarySortTree.delNode(10);
-        binarySortTree.delNode(2);
-        binarySortTree.delNode(3);
-
-        binarySortTree.delNode(9);
-        binarySortTree.delNode(1);
-        binarySortTree.delNode(7);
-
-        System.out.println("删除结点后");
-        binarySortTree.infixOrder();
+//        System.out.println("删除结点后");
+//        binarySortTree.infixOrder();
     }
 }
 
@@ -205,7 +209,7 @@ class BinarySortTree {
  * @Param
  * @return
  **/
-class Node {
+class Node implements TreeNode {
     public int value;
     public Node left;
     public Node right;
@@ -310,6 +314,21 @@ class Node {
 
     @Override
     public String toString() {
-        return "Node [value=" + value + "]";
+        return "[" + value + "]";
+    }
+
+    @Override
+    public String getPrintInfo() {
+        return toString();
+    }
+
+    @Override
+    public TreeNode getLeftChild() {
+        return left;
+    }
+
+    @Override
+    public TreeNode getRightChild() {
+        return right;
     }
 }
