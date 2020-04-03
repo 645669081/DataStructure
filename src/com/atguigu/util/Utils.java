@@ -109,6 +109,7 @@ public class Utils {
                     buffer.append(" ");
                 } else {
                     buffer.append(info);
+                    //此处i加上字符长度很可能跳过一些节点，导致最终没有打印出来
                     i += info.length();
                 }
             }
